@@ -1,88 +1,154 @@
 # Image Scraper
 
-本專案是一個基於 Python 的圖片爬取工具，可以從 Google 圖片搜尋中下載符合指定尺寸的圖片，並儲存到本地資料夾。
+## 概要
 
-## 功能
+Image Scraper 是一個強大的自動圖片抓取工具，旨在幫助使用者快速搜尋並下載符合條件的圖片。專案同時提供完整的構建與打包工作流，支援多平台的應用程式打包與發佈。
 
-- 支援從 `foodList.txt` 中讀取食物名稱列表，並逐一搜尋相關圖片。
-- 支援設定最小圖片寬度與高度過濾圖片。
-- 支援多線程下載，提升下載效率。
-- 自動建構對應的資料夾結構。
+---
 
-## 安裝與使用
+## 開始使用
 
-### 環境需求
+在 GitHub 頁面中，進入本專案的 [Releases](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY/releases) 頁面。
 
-- Python 3.8+
-- 安裝以下套件：
+選擇最新的發佈版本。
+
+根據您使用的操作系統下載對應的檔案：
+
+- `my_app-windows.zip` (適用於 Windows)
+- `my_app-macos.tar` (適用於 macOS)
+- `my_app-linux.tar` (適用於 Linux)
+
+解壓縮下載的檔案，並根據需要執行應用程式。
+
+---
+
+## 自動圖片抓取工具
+
+### 功能
+
+- **無頭瀏覽**：使用 Selenium WebDriver 與無頭模式的 Chrome 進行圖片抓取。
+- **基於關鍵字的搜尋**：根據指定的食物名稱搜尋 Google 圖片。
+- **並行執行**：同時下載多個關鍵字的圖片以節省時間。
+- **尺寸驗證**：確保圖片符合最小寬度和高度的要求。
+
+### 需求
+
+- Python 3.10+
+- 依賴項：
   - `selenium`
-  - `webdriver_manager`
+  - `webdriver-manager`
   - `beautifulsoup4`
   - `requests`
   - `pillow`
+  - `lxml`
+  - `tenacity`
 
-### 安裝方式
+### 使用方法
 
-1. 克隆專案：
-   ```bash
-   git clone <你的專案網址>
-   cd <專案資料夾>
+1. 在專案目錄下創建名為 `key_word_list.txt` 的檔案，並添加以逗號分隔的關鍵字。例如：
    ```
-
-2. 安裝所需套件：
-   ```bash
-   pip install -r requirements.txt
+   apple,banana,orange
    ```
+2. 執行腳本：
+   ```bash
+   python scraper.py
+   ```
+3. 圖片將保存於 `images/<food_name>` 資料夾中。
 
-### 建立 `foodList.txt`
+### 函式
 
-建立一個名為 `foodList.txt` 的檔案，並將要搜尋的食物名稱以逗號分隔，例如：
+#### `scroll_page`
+
+滾動頁面多次以載入更多圖片。
+
+#### `verify_image_size`
+
+驗證圖片是否符合最小尺寸要求。
+
+#### `search_and_download`
+
+搜尋圖片並下載符合條件的圖片。
+
+### 並行執行
+
+此腳本使用 `ThreadPoolExecutor` 同時執行多個關鍵字的搜尋與下載。
+
+---
+
+## 構建與打包工作流
+
+### 功能
+
+- **多平台支持**：自動構建並打包適用於 `Windows`、`macOS` 和 `Linux` 的應用程式。
+- **上傳產物**：將打包的檔案壓縮並作為 GitHub Actions 產物上傳。
+- **版本化發佈**：自動生成版本號並在推送到 `main` 分支時創建 GitHub 發佈。
+
+### 工作流細節
+
+#### 觸發條件
+
+- 推送到 `main` 分支。
+- 針對 `main` 分支的拉取請求。
+
+#### 構建工作
+
+`build` 任務在以下操作系統上執行：
+
+- `ubuntu-latest`
+- `macos-latest`
+- `windows-latest`
+
+執行步驟包括：
+
+1. **檢出程式碼**
+2. **設置 Python 環境**
+3. **安裝依賴項**
+4. **打包應用程式**
+5. **上傳產物**
+
+#### 發佈工作
+
+此任務僅在以下情況下創建發佈：
+
+- 推送到 `main` 分支。
+
+執行步驟包括：
+
+1. **生成版本號**
+2. **下載產物**
+3. **創建 GitHub 發佈**
+
+### 工作流檔案
+
+請參考 `.github/workflows/build-and-release.yml` 以獲取實現細節。
+
+---
+
+## 目錄結構
+
 ```
-蘋果,香蕉,橘子
+.
+├── images/                # 圖片保存目錄
+├── archive/               # 壓縮檔案目錄
+├── dist/                  # 構建產物目錄
+├── key_word_list.txt      # 關鍵字列表檔案
+├── main.py                # 應用程式進入點
+├── scraper.py             # 圖片抓取腳本
+├── requirements.txt       # Python 依賴項
+└── .github/workflows/     # GitHub Actions 工作流
 ```
 
-### 執行程式
-
-執行以下命令開始爬取圖片：
-```bash
-python <程式檔名>.py
-```
-
-爬取的圖片將會儲存在 `images/<食物名稱>` 資料夾中。
-
-## 設定與調整
-
-- **最小圖片尺寸**：
-  在程式中調整以下變數來改變尺寸過濾條件：
-  ```python
-  MIN_WIDTH = 150
-  MIN_HEIGHT = 150
-  ```
-
-- **滾動次數與延遲**：
-  可以調整滾動次數與每次滾動的延遲：
-  ```python
-  scroll_page(driver, scrolls=5, delay=1)
-  ```
-
-- **最大線程數量**：
-  修改多線程執行時的最大線程數：
-  ```python
-  max_workers=10
-  ```
+---
 
 ## 注意事項
 
-- 此程式使用 Selenium 操作瀏覽器，須確保安裝了 Chrome 瀏覽器。
-- 無頭模式下可能會有部分圖片無法正常載入，建議在開發或測試階段可以移除 `--headless` 選項。
-- 本程式僅供學術與個人使用，請勿用於商業用途或違反 Google 使用條款的操作。
+- 確保已安裝 Google Chrome 和 ChromeDriver，以便 Selenium 正常工作。
+- 抓取圖片時請遵守 Google 的服務條款。
+- 如果需要不同的尺寸限制，可在 `scraper.py` 中調整 `MIN_WIDTH` 和 `MIN_HEIGHT` 變數。
 
-## 參考
-
-- [Selenium Documentation](https://www.selenium.dev/documentation/)
-- [BeautifulSoup Documentation](https://www.crummy.com/software/BeautifulSoup/)
-- [Pillow Documentation](https://pillow.readthedocs.io/)
+---
 
 ## 授權
 
-本專案採用 [MIT License](LICENSE)。
+本專案採用 MIT 授權條款。
+
