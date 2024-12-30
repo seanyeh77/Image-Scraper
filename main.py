@@ -32,6 +32,7 @@ def search_and_download(food_name, min_width=150, min_height=150):
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
+    options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--lang=zh-TW")
     
