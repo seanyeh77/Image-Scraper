@@ -10,6 +10,7 @@ from PIL import Image
 from io import BytesIO
 import concurrent.futures
 import time
+import os
 
 def scroll_page(driver, scrolls=5, delay=1):
     """滾動頁面指定次數，每次延遲指定秒數"""
@@ -47,7 +48,7 @@ def search_and_download(food_name, min_width=150, min_height=150):
         time.sleep(3)  # 等待初始頁面加載
 
         # 滾動頁面5次，每次間隔1秒
-        scroll_page(driver, scrolls=5, delay=1)
+        scroll_page(driver, scrolls=10, delay=2)
 
         # 解析頁面
         soup = BeautifulSoup(driver.page_source, "lxml")
@@ -100,7 +101,7 @@ if __name__ == "__main__":
         MIN_HEIGHT = 150
 
         # 平行執行搜尋與下載
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
             futures = [executor.submit(search_and_download, food, MIN_WIDTH, MIN_HEIGHT) 
                     for food in food_list]
             concurrent.futures.wait(futures)
