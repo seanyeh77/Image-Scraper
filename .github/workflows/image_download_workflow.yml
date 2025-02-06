@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt || pip install pyinstaller selenium webdriver-manager beautifulsoup4 requests pillow lxml tenacity
+          pip install -r requirements.txt || pip install pyinstaller selenium webdriver-manager beautifulsoup4 requests pillow lxml tenacity openpyxl
 
       - name: Install zip for Windows
         if: runner.os == 'Windows'
