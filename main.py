@@ -11,6 +11,7 @@ from io import BytesIO
 import concurrent.futures
 import time
 import os
+import openpyxl
 
 def scroll_page(driver, scrolls=5, delay=1):
     """滾動頁面指定次數，每次延遲指定秒數"""
@@ -29,6 +30,7 @@ def verify_image_size(image_data, min_width=150, min_height=150):
         return False
 
 def search_and_download(food_name, min_width=150, min_height=150):
+    print(f"正在搜尋 {food_name} 的圖片...")
     # 設定無頭模式
     options = Options()
     options.add_argument("--headless")
@@ -80,6 +82,52 @@ def search_and_download(food_name, min_width=150, min_height=150):
 
             except Exception as e:
                 continue
+
+        # 個別食物清冊
+        file_name = f"{food_name}_清冊.xlsx"
+        sheet_name = "食物清冊"
+        first_column = "食物"
+        second_column = "檔名"
+
+        file_path = os.path.join(output_dir, file_name)
+        if not os.path.exists(file_path):
+            wb = openpyxl.Workbook()
+            sheet = wb.active
+            sheet.title = sheet_name
+            sheet["A1"] = first_column
+            sheet["B1"] = second_column
+            wb.save(file_path)
+        wb = openpyxl.load_workbook(file_path)
+        sheet = wb.active
+        sheet_values = [sheet.cell(row, 2).value for row in range(2, sheet.max_row+1)]  # 已存在的檔名
+        for i in range(1, downloaded_count+1):
+            img_name = f"{food_name}_{i}.jpg"
+            if img_name in sheet_values: continue
+            sheet.append([food_name, img_name])
+        wb.save(file_path)
+
+        # 總清冊
+        file_name = "總清冊.xlsx"
+        sheet_name = "食物清冊"
+        first_column = "食物"
+        second_column = "檔名"
+        file_path = os.path.join("images", file_name)
+        if not os.path.exists(file_path):
+            wb = openpyxl.Workbook()
+            sheet = wb.active
+            sheet.title = sheet_name
+            sheet["A1"] = first_column
+            sheet["B1"] = second_column
+            wb.save(file_path)
+        wb = openpyxl.load_workbook(file_path)
+        sheet = wb.active
+        sheet_values = [sheet.cell(row, 2).value for row in range(2, sheet.max_row+1)]  # 已存在的檔名
+        for i in range(1, downloaded_count+1):
+            # 判斷是否已經存在
+            img_name = f"{food_name}_{i}.jpg"
+            if img_name in sheet_values: continue
+            sheet.append([food_name, img_name])
+        wb.save(file_path)
 
         print(f"{food_name} 共成功下載 {downloaded_count} 張符合尺寸要求的圖片")
 
